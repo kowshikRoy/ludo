@@ -19,11 +19,24 @@
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 
-  /* Custom Ludo Colors */
+  /* Material 3 Token-like Ludo Colors */
   --color-ludo-red: #ea4335;
+  --color-ludo-red-container: #fce8e6;
+    --color-ludo-red-on-container: #8c1d18;
   --color-ludo-green: #34a853;
+  --color-ludo-green-container: #e6f4ea;
+    --color-ludo-green-on-container: #137333;
   --color-ludo-blue: #4285f4;
+  --color-ludo-blue-container: #e8f0fe;
+    --color-ludo-blue-on-container: #1967d2;
   --color-ludo-yellow: #fbbc05;
+  --color-ludo-yellow-container: #fef7e0;
+    --color-ludo-yellow-on-container: #ea8600;
+  
+    /* MD3 Surface Tones */
+    --color-md-surface: #ffffff;
+    --color-md-surface-container: #f0f4f9;
+    --color-md-outline-variant: #c4c7c5;
 }
 
 :root {
@@ -124,17 +137,80 @@ body {
   }
 }
 
+/* Game Container Layout */
+.game-container {
+  display: grid;
+  grid-template-areas:
+    "blue board yellow"
+    "red  board green";
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+@media (max-width: 1024px) {
+  .game-container {
+    grid-template-areas:
+      "blue yellow"
+      "board board"
+      "red green";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+  }
+}
+
+/* Player HUD Grid Areas */
+.player-hud.blue {
+  grid-area: blue;
+  justify-self: end;
+}
+
+.player-hud.yellow {
+  grid-area: yellow;
+  justify-self: start;
+}
+
+.player-hud.red {
+  grid-area: red;
+  justify-self: end;
+}
+
+.player-hud.green {
+  grid-area: green;
+  justify-self: start;
+}
+
+/* In mobile/tablet, center standardly */
+@media (max-width: 1024px) {
+
+  .player-hud.blue,
+  .player-hud.yellow,
+  .player-hud.red,
+  .player-hud.green {
+    justify-self: center;
+  }
+}
 /* Game Components matching upstream structure but using Tailwind v4 variables where possible */
 .board {
+  grid-area: board;
   display: grid;
   grid-template-columns: repeat(15, 1fr);
   grid-template-rows: repeat(15, 1fr);
   width: min(80vmin, 600px);
   height: min(80vmin, 600px);
-  background-color: #ffffff;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 80px rgba(66, 133, 244, 0.2);
-  border: 4px solid #333;
-  border-radius: 8px;
+  background-color: var(--color-md-surface-container);
+    gap: 2px;
+    padding: 8px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 24px;
   position: relative;
   z-index: 10;
 }
@@ -188,59 +264,177 @@ body {
   animation: pulseGlow 3s ease infinite;
 }
 
+/* Common Base Styles */
 .base {
-  grid-row: span 6;
-  grid-column: span 6;
-  padding: 15%;
-  border: 1px solid #333;
-  background-color: white;
+  padding: 12%;
+    /* Slightly less padding for cleaner look */
+    /* Border removed, using gap/background separation */
+    background-color: var(--color-md-surface);
+    border-radius: 16px;
+    position: relative;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-md-outline-variant);
+    /* Restored Border */
+  }
+  
+  /* Base Positioning (15x15 Grid) */
+  .base.blue {
+    grid-column: 1 / 7;
+    grid-row: 1 / 7;
+    background-color: var(--color-md-surface);
+  }
+  
+  .base.yellow {
+    grid-column: 10 / 16;
+    grid-row: 1 / 7;
+    background-color: var(--color-md-surface);
+  }
+  
+  .base.red {
+    grid-column: 1 / 7;
+    grid-row: 10 / 16;
+    background-color: var(--color-md-surface);
+  }
+  
+  .base.green {
+    grid-column: 10 / 16;
+    grid-row: 10 / 16;
+    background-color: var(--color-md-surface);
 }
 
+/* Base Internal Layout */
 .base-inner {
   width: 100%;
   height: 100%;
-  background-color: white;
+  /* Use colored container for the inner base */
+    border-radius: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   place-items: center;
-  border-radius: 12px;
 }
 
+/* Specific Base Inner Colors - using Container tokens */
+.base.blue .base-inner {
+  background-color: var(--color-ludo-blue-container);
+}
+
+.base.yellow .base-inner {
+  background-color: var(--color-ludo-yellow-container);
+}
+
+.base.red .base-inner {
+  background-color: var(--color-ludo-red-container);
+}
+
+.base.green .base-inner {
+  background-color: var(--color-ludo-green-container);
+}
+
+/* Arm Positioning & Layout */
+.arm {
+  display: grid;
+  background-color: transparent;
+  /* Transparent so board gaps are visible if needed, or colored */
+  gap: 2px;
+  /* Internal gap for arm cells */
+}
+
+/* We need to ensure arms take up space correctly but cells are what matters. */
+/* Actually, if .board has gap=2px, we might not need gap in arm if arm is `display:contents`? 
+   No, grid-area components need their own internal layout.
+   Let's keep arm grid but match the gap.
+*/
+.arm.top {
+  grid-column: 7 / 10;
+  grid-row: 1 / 7;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.arm.bottom {
+  grid-column: 7 / 10;
+  grid-row: 10 / 16;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.arm.left {
+  grid-column: 1 / 7;
+  grid-row: 7 / 10;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.arm.right {
+  grid-column: 10 / 16;
+  grid-row: 7 / 10;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+/* Center Home Positioning */
+.center-home {
+  grid-column: 7 / 10;
+  grid-row: 7 / 10;
+  position: relative;
+  z-index: 5;
+  background-color: var(--color-md-surface);
+  /* White background for triangle contrast */
+  border-radius: 8px;
+  /* Small rounding */
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
 .base-spot {
-  width: 50%;
-  height: 50%;
+  width: 60%;
+    height: 60%;
   border-radius: 50%;
-  background-color: white;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-md-surface);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Soft elevated spot */
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .cell {
-  border: 1px solid #333;
+  border: 1px solid var(--color-md-outline-variant);
+    /* Restored Border */
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
   position: relative;
-  background-color: white;
+  background-color: var(--color-md-surface);
+    border-radius: 4px;
+    /* Slight rounding for tiles */
 }
 
+/* Tonal Color Classes for Cells */
 .bg-ludo-red {
   background-color: var(--color-ludo-red);
+  color: white;
 }
 
 .bg-ludo-green {
   background-color: var(--color-ludo-green);
+  color: white;
 }
 
 .bg-ludo-blue {
   background-color: var(--color-ludo-blue);
+  color: white;
 }
 
 .bg-ludo-yellow {
   background-color: var(--color-ludo-yellow);
+  color: black;
+    /* Better contrast on yellow */
 }
 
+/* Specific Base styling no longer needed as we use .base.blue etc blocks above, wait.
+   We defined .base.blue grid positioning but also need background logic.
+   I moved background logic to .base-inner for the color container. 
+*/
 .pawn {
   width: 80%;
   height: 80%;
