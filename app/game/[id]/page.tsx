@@ -32,59 +32,118 @@ export default function GamePage() {
     const canStart = players.length >= 2;
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-4">
-        <h2 className="text-3xl font-bold">Lobby: {gameId}</h2>
-        <div className="bg-gray-100 p-6 rounded shadow-md w-full max-w-md">
-          <h3 className="font-bold text-lg mb-4">Players Joined: {players.length}/4</h3>
-          <ul className="space-y-2">
-            {players.map((p, i) => (
-              <li key={i} className="flex items-center gap-2">
-                <span
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: `var(--color-${p.color})` }}
-                />
-                <span className="font-medium">{p.name}</span>
-                {p.color === myColor && <span className="text-sm text-gray-500">(You)</span>}
-              </li>
-            ))}
-          </ul>
-          {!canStart && (
-            <p className="text-sm text-orange-600 mt-4 font-medium">
-              ⚠️ Minimum 2 players required to start
-            </p>
-          )}
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background-dark p-6 relative overflow-hidden">
+        {/* Background Ambient Effects */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] pointer-events-none"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[128px] pointer-events-none"></div>
 
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm text-gray-600">Share the Room ID to invite friends!</p>
-          <div className="flex gap-2">
-            <code className="bg-gray-200 p-2 rounded">{gameId}</code>
+        {/* Main Content Card */}
+        <div className="w-full max-w-lg z-10 flex flex-col gap-6">
+          <div className="text-center mb-4">
+            <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">Game Lobby</h2>
+            <p className="text-secondary">Waiting for players to join...</p>
+          </div>
+
+          {/* Room Code Card */}
+          <div className="bg-surface-dark border border-surface-variant rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+              <span className="material-symbols-outlined text-8xl text-white">vpn_key</span>
+            </div>
+            <p className="text-xs font-bold text-secondary uppercase tracking-widest mb-2">Room Code</p>
+            <div className="flex items-center gap-3">
+              <code className="text-3xl font-mono font-bold text-white tracking-widest">{gameId}</code>
+              <button
+                onClick={() => navigator.clipboard.writeText(gameId)}
+                className="size-10 rounded-xl bg-surface-variant hover:bg-primary text-white flex items-center justify-center transition-all active:scale-95 ml-auto z-10"
+                title="Copy Code"
+              >
+                <span className="material-symbols-outlined">content_copy</span>
+              </button>
+            </div>
+            <p className="text-xs text-secondary/60 mt-4 flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">info</span>
+              Share this code with your friends to invite them.
+            </p>
+          </div>
+
+          {/* Players List */}
+          <div className="bg-surface-dark border border-surface-variant rounded-2xl overflow-hidden shadow-xl flex flex-col">
+            <div className="p-4 border-b border-surface-variant flex items-center justify-between bg-surface-variant/10">
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">group</span>
+                Players ({players.length}/4)
+              </h3>
+              {canStart ? (
+                <span className="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded-lg border border-green-500/20">Ready to Start</span>
+              ) : (
+                <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded-lg border border-orange-500/20">Waiting...</span>
+              )}
+            </div>
+            <div className="p-2 flex flex-col gap-1">
+              {players.map((p, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-background-dark/50 border border-surface-variant/50">
+                  {/* Avatar Placeholder */}
+                  <div className="size-10 rounded-full bg-gradient-to-br from-surface-variant to-background-dark border border-white/10 flex items-center justify-center shadow-inner">
+                    <span className="material-symbols-outlined text-white/40 text-lg">person</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white flex items-center gap-2">
+                      {p.name}
+                      {p.color === myColor && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded border border-primary/20">ME</span>}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={`size-2 rounded-full`} style={{ backgroundColor: `var(--color-${p.color})` }}></span>
+                      <span className="text-xs text-secondary capitalize">{p.color} Team</span>
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                </div>
+              ))}
+              {/* Empty Slots */}
+              {Array.from({ length: 4 - players.length }).map((_, i) => (
+                <div key={`empty-${i}`} className="flex items-center gap-4 p-3 rounded-xl border border-dashed border-surface-variant/50 opacity-50">
+                  <div className="size-10 rounded-full bg-surface-variant/20 border border-white/5 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white/20 text-lg">person_add</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-secondary">Empty Slot</p>
+                    <p className="text-xs text-secondary/50">Waiting for player...</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Button */}
+          {amICreator ? (
             <button
-              onClick={() => navigator.clipboard.writeText(gameId)}
-              className="text-blue-500 hover:underline"
+              onClick={() => startGame(gameId)}
+              disabled={!canStart}
+              className={`w-full h-14 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all ${canStart
+                ? 'bg-primary hover:bg-primary-dark text-white hover:scale-[1.02] active:scale-[0.98] shadow-primary/25'
+                : 'bg-surface-variant text-secondary cursor-not-allowed opacity-50'
+                }`}
             >
-              Copy
+              <span className="material-symbols-outlined fill-1">play_arrow</span>
+              Start Game
+            </button>
+          ) : (
+            <div className="w-full h-14 rounded-2xl bg-surface-variant/20 border border-surface-variant flex items-center justify-center gap-3 text-secondary animate-pulse">
+              <span className="animate-spin size-5 border-2 border-primary border-t-transparent rounded-full"></span>
+              <span className="font-bold">Waiting for host to start...</span>
+            </div>
+          )}
+
+          <div className="flex justify-center mt-2">
+            <button onClick={() => window.history.back()} className="text-sm font-bold text-secondary hover:text-white transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-lg">arrow_back</span>
+              Leave Lobby
             </button>
           </div>
         </div>
-
-        {amICreator && (
-          <button
-            onClick={() => startGame(gameId)}
-            disabled={!canStart}
-            className={`px-8 py-3 rounded text-xl font-bold ${canStart
-              ? 'bg-green-500 text-white hover:bg-green-600'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-          >
-            Start Game
-          </button>
-        )}
-        {!amICreator && (
-          <p className="text-gray-500 italic">Waiting for host to start...</p>
-        )}
       </div>
     );
+
   }
 
   return (
